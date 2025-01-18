@@ -113,12 +113,23 @@ class OverViewTable(DataTable):
                     severity="error",
                 )
 
-    @work(thread=True, exclusive=True)
+    @work(thread=True, exclusive=False, name="look-for-devices")
     async def action_display_new_devices(self):
-        await self.app.mount(Label("Searching...", id="label-search"))
+        self.app.call_from_thread(callback=self.show_search_label)
         new_devices = await search_new_devices()
+        self.app.call_from_thread(callback=self.hide_search_label)
+
+        self.app.call_from_thread(
+            callback=lambda: self.update_rows(new_devices=new_devices)
+        )
+
+    async def show_search_label(self):
+        await self.app.mount(Label("Searching...", id="label-search"))
+
+    async def hide_search_label(self):
         await self.app.query_exactly_one("#label-search", Label).remove()
 
+    def update_rows(self, new_devices: list[dict]):
         for device in new_devices:
             if device["address"] in [key.value for key in self.rows.keys()]:
                 continue

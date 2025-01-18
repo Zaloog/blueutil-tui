@@ -146,7 +146,7 @@ async def search_new_devices():
         args=["blueutil", "--inquiry", "4", "--format", "json"],
         capture_output=True,
         text=True,
-        timeout=TIMEOUT,
+        # timeout=TIMEOUT,
     )
 
     handle_returncodes(errorcode=command.returncode)

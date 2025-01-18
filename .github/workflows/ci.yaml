@@ -69,7 +69,7 @@ jobs:
   publish:
     needs: finalize_coverage
     if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/') }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     environment: 'publish'
     permissions:
       # IMPORTANT: this permission is mandatory for trusted publishing
