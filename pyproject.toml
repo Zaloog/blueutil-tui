@@ -30,6 +30,7 @@ classifiers = [
 [project.urls]
 Repository = "https://github.com/Zaloog/blueutil-tui"
 Changelog = "https://github.com/Zaloog/blueutil-tui/blob/main/CHANGELOG.md"
+
 [project.scripts]
 btui = "blueutil_tui:main"
 
@@ -40,5 +41,20 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "pre-commit>=4.0.1",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
     "textual-dev>=1.7.0",
 ]
+
+[tool.pytest.ini_options]
+# async for app tests
+# asyncio_mode = "auto"
+# asyncio_default_fixture_loop_scope = "file"
+addopts = "--cov src/blueutil_tui --cov-report term-missing --verbose --color=yes"# -n 4 --dist=loadfile"
+testpaths = ["tests"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/blueutil_tui"]

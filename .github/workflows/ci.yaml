@@ -1,0 +1,101 @@
+name: Continuous Integration
+
+on:
+  push:
+    # Avoid using all the resources/limits available by checking only
+    # relevant branches and tags. Other branches can be checked via PRs.
+    # branches: [main]
+    tags: ['v[0-9]*', '[0-9]+.[0-9]+*']  # Match tags that resemble a version
+  pull_request:  # Run in every PR
+  workflow_dispatch:  # Allow manually triggering the workflow
+
+permissions:
+  contents: read
+
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        python-version:
+        - "3.10"
+        # - "3.11"
+        - "3.12"
+        - "3.13"
+        platform:
+        - macos-latest
+    runs-on: ${{matrix.platform}}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{matrix.python-version}}
+      - name: Install the project
+        run: uv sync --all-extras --dev -p ${{matrix.python-version}}
+
+      - name: Run tests
+        # For example, using `pytest`
+        run: uv run -p ${{matrix.python-version}} pytest tests
+
+        # Generate Coverage
+      - name: Generate coverage report
+        run: uv run coverage lcov -o coverage.lcov
+      - name: Upload partial coverage report
+        uses: coverallsapp/github-action@v2
+        with:
+          path-to-lcov: coverage.lcov
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: ${{ matrix.platform }} - py${{ matrix.python }}
+          parallel: true
+
+  finalize_coverage:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Finalize coverage report
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
+
+  publish:
+    needs: finalize_coverage
+    if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    environment: 'publish'
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      # id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: "Build Package"
+        run: uv build
+
+      - name: "Publish Package to PyPi"
+        env:
+          # UV_PUBLISH_USERNAME: __token__
+          UV_PUBLISH_TOKEN: ${{secrets.PYPI_TOKEN}}
+
+        run: uv publish
+      # - name: Publish package distributions to PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
