@@ -10,6 +10,8 @@
 blueutil-tui is macos tui to connect bluetooth devices with the help of [blueutil].
 Its written in python with the [textual] framework.
 
+![preview](https://raw.githubusercontent.com/Zaloog/blueutil-tui/main/images/preview.png)
+
 ## Installation
 
 You can install `blueutil-tui` with one of the following options:
