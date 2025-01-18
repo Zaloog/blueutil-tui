@@ -8,6 +8,8 @@ from blueutil_tui.utils import (
     disconnect_device,
     device_is_connected,
     search_new_devices,
+    pair_device,
+    unpair_device,
 )
 
 
@@ -15,9 +17,10 @@ class OverViewTable(DataTable):
     BINDINGS = [
         Binding("j, down", "cursor_down", "down", key_display="j/↓"),
         Binding("k, up", "cursor_up", "up", key_display="k/↑"),
-        Binding("space", "select_cursor", "dis/connect"),
+        Binding("space", "select_cursor", "dis/connect", key_display="space/enter"),
         Binding("r", "update_devices", "refresh"),
         Binding("s", "display_new_devices", "search"),
+        Binding("p", "toggle_pair_device", "un/pair"),
     ]
 
     def on_mount(self):
@@ -110,7 +113,7 @@ class OverViewTable(DataTable):
                     severity="error",
                 )
 
-    @work(thread=True)
+    @work(thread=True, exclusive=True)
     async def action_display_new_devices(self):
         await self.app.mount(Label("Searching...", id="label-search"))
         new_devices = await search_new_devices()
@@ -128,3 +131,69 @@ class OverViewTable(DataTable):
                 key=device["address"],
                 label=f"[blue]{device['name']}[/]",
             )
+
+    @work(thread=True)
+    async def action_toggle_pair_device(self):
+        selected_address = self.get_row_at(self.cursor_row)[-1]
+        paired = True if "green" in self.get_row_at(self.cursor_row)[1] else False
+        # self.notify(f'{selected_address}', timeout=1)
+        # return
+
+        if paired:
+            self.update_cell(
+                row_key=selected_address, column_key="paired", value="updating..."
+            )
+
+            output = await unpair_device(device_address=selected_address)
+            if output == 0:
+                self.update_cell(
+                    row_key=selected_address,
+                    column_key="paired",
+                    value=":red_circle:",
+                )
+                self.notify(
+                    title="Success",
+                    message=f"[blue]{self.rows[selected_address].label}[/] unpaired",
+                    timeout=1.5,
+                )
+            else:
+                self.update_cell(
+                    row_key=selected_address,
+                    column_key="paired",
+                    value=":green_circle:",
+                )
+                self.notify(
+                    title="Error",
+                    message=f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby",
+                    timeout=1.5,
+                    severity="error",
+                )
+        else:
+            self.update_cell(
+                row_key=selected_address, column_key="paired", value="updating..."
+            )
+            output = await pair_device(device_address=selected_address)
+
+            if output == 0:
+                self.update_cell(
+                    row_key=selected_address,
+                    column_key="paired",
+                    value=":green_circle:",
+                )
+                self.notify(
+                    title="Success",
+                    message=f"[blue]{self.rows[selected_address].label}[/] pairing",
+                    timeout=1.5,
+                )
+            else:
+                self.update_cell(
+                    row_key=selected_address,
+                    column_key="paired",
+                    value=":red_circle:",
+                )
+                self.notify(
+                    title="Error",
+                    message=f"Please check if [blue]{self.rows[selected_address].label}[/] is nearby",
+                    timeout=1.5,
+                    severity="error",
+                )

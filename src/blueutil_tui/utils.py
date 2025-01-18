@@ -143,7 +143,7 @@ async def disconnect_device(device_address: str):
 
 async def search_new_devices():
     command = subprocess.run(
-        args=["blueutil", "--inquiry", "7", "--format", "json"],
+        args=["blueutil", "--inquiry", "4", "--format", "json"],
         capture_output=True,
         text=True,
         timeout=TIMEOUT,
@@ -155,3 +155,35 @@ async def search_new_devices():
         devices = command.stdout
         formatted_devices = format_device_string(device_string=devices)
         return formatted_devices
+
+
+async def pair_device(device_address: str) -> int:
+    try:
+        command = subprocess.run(
+            args=["blueutil", "--pair", device_address],
+            capture_output=True,
+            text=True,
+            timeout=TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        return 1
+
+    returncode = handle_returncodes(errorcode=command.returncode)
+
+    return returncode
+
+
+async def unpair_device(device_address: str) -> int:
+    try:
+        command = subprocess.run(
+            args=["blueutil", "--unpair", device_address],
+            capture_output=True,
+            text=True,
+            timeout=TIMEOUT,
+        )
+    except subprocess.TimeoutExpired:
+        return 1
+
+    returncode = handle_returncodes(errorcode=command.returncode)
+
+    return returncode
