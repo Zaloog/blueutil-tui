@@ -2,7 +2,12 @@ from textual import on, work
 from textual.widgets import DataTable
 from textual.binding import Binding
 
-from blueutil_tui.utils import get_paired_devices, connect_device, disconnect_device
+from blueutil_tui.utils import (
+    get_paired_devices,
+    connect_device,
+    disconnect_device,
+    device_is_connected,
+)
 from blueutil_tui.constants import GREEN_RED_DICT
 
 
@@ -43,7 +48,7 @@ class OverViewTable(DataTable):
     async def toggle_connection(self, event: DataTable.RowSelected):
         selected_address = event.row_key.value
 
-        if self.get_row(row_key=selected_address)[0] == ":green_circle:":
+        if await device_is_connected(device_address=selected_address):
             self.update_cell(
                 row_key=selected_address, column_key="connection", value="updating..."
             )

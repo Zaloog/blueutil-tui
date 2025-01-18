@@ -100,6 +100,22 @@ async def connect_device(device_address: str):
     return returncode
 
 
+async def device_is_connected(device_address: str) -> bool:
+    try:
+        command = subprocess.run(
+            args=["blueutil", "--is-connected", device_address],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except subprocess.TimeoutExpired as e:
+        raise e
+
+    # returncode = handle_returncodes(errorcode=command.returncode)
+
+    return bool(int(command.stdout))
+
+
 async def disconnect_device(device_address: str):
     try:
         command = subprocess.run(
