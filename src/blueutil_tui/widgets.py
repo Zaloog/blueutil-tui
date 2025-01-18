@@ -1,5 +1,5 @@
 from textual import on, work
-from textual.widgets import DataTable
+from textual.widgets import DataTable, Label
 from textual.binding import Binding
 
 from blueutil_tui.utils import (
@@ -7,15 +7,17 @@ from blueutil_tui.utils import (
     connect_device,
     disconnect_device,
     device_is_connected,
+    search_new_devices,
 )
-from blueutil_tui.constants import GREEN_RED_DICT
 
 
 class OverViewTable(DataTable):
     BINDINGS = [
-        Binding("j, down", "cursor_down", "Down", key_display="j/↓"),
-        Binding("k, up", "cursor_up", "Up", key_display="k/↑"),
-        Binding("space", "select_cursor", "Connect/Disconnect"),
+        Binding("j, down", "cursor_down", "down", key_display="j/↓"),
+        Binding("k, up", "cursor_up", "up", key_display="k/↑"),
+        Binding("space", "select_cursor", "dis/connect"),
+        Binding("r", "update_devices", "refresh"),
+        Binding("s", "display_new_devices", "search"),
     ]
 
     def on_mount(self):
@@ -28,15 +30,16 @@ class OverViewTable(DataTable):
         self.add_column(":five_o’clock: Last Access", key="last_access")
         self.add_column(":house: Address", key="address")
 
-        self.update_devices()
+        self.action_update_devices()
         return super().on_mount()
 
-    def update_devices(self):
+    def action_update_devices(self):
+        self.clear()
         devices = get_paired_devices()
         for device in devices:
             self.add_row(
-                GREEN_RED_DICT[device["connected"]],
-                GREEN_RED_DICT[device["paired"]],
+                ":green_circle:" if device["connected"] else ":red_circle:",
+                ":green_circle:" if device["paired"] else ":red_circle:",
                 device["recentAccessDate"],
                 device["address"],
                 key=device["address"],
@@ -60,7 +63,11 @@ class OverViewTable(DataTable):
                     column_key="connection",
                     value=":red_circle:",
                 )
-                self.notify("Disconnected", timeout=1)
+                self.notify(
+                    title="Success",
+                    message=f"[blue]{self.rows[selected_address].label}[/] disconnected",
+                    timeout=1.5,
+                )
             else:
                 self.update_cell(
                     row_key=selected_address,
@@ -69,8 +76,8 @@ class OverViewTable(DataTable):
                 )
                 self.notify(
                     title="Error",
-                    message="Please check if the device is nearby",
-                    timeout=1,
+                    message=f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby",
+                    timeout=1.5,
                     severity="error",
                 )
         else:
@@ -85,7 +92,11 @@ class OverViewTable(DataTable):
                     column_key="connection",
                     value=":green_circle:",
                 )
-                self.notify("Connected", timeout=1)
+                self.notify(
+                    title="Success",
+                    message=f"[blue]{self.rows[selected_address].label}[/] connected",
+                    timeout=1.5,
+                )
             else:
                 self.update_cell(
                     row_key=selected_address,
@@ -94,7 +105,26 @@ class OverViewTable(DataTable):
                 )
                 self.notify(
                     title="Error",
-                    message="Please check if the device is nearby",
-                    timeout=1,
+                    message=f"Please check if [blue]{self.rows[selected_address].label}[/] is nearby",
+                    timeout=1.5,
                     severity="error",
                 )
+
+    @work(thread=True)
+    async def action_display_new_devices(self):
+        await self.app.mount(Label("Searching...", id="label-search"))
+        new_devices = await search_new_devices()
+        await self.app.query_exactly_one("#label-search", Label).remove()
+
+        for device in new_devices:
+            if device["address"] in [key.value for key in self.rows.keys()]:
+                continue
+
+            self.add_row(
+                ":green_circle:" if device["connected"] else ":red_circle:",
+                ":green_circle:" if device["paired"] else ":red_circle:",
+                device["recentAccessDate"],
+                device["address"],
+                key=device["address"],
+                label=f"[blue]{device['name']}[/]",
+            )

@@ -21,4 +21,5 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "pre-commit>=4.0.1",
+    "textual-dev>=1.7.0",
 ]

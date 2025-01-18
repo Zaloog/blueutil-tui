@@ -5,19 +5,29 @@ import json
 from rich.console import Console
 
 console = Console()
+TIMEOUT = 8
 
 
 def check_blueutil_installation():
     if shutil.which("blueutil") is None:
-        Console().print(
+        console.print(
             '[blue]"blueutil"[/] was not found, please install with e.g. [blue]"brew install blueutil"[/] '
         )
-        Console().print("or use another installation method from:")
-        Console().print(
+        console.print("or use another installation method from:")
+        console.print(
             "[blue underline]https://github.com/toy/blueutil?tab=readme-ov-file#installupdateuninstall[/] "
         )
         return False
     return True
+
+
+def get_blueutil_version():
+    command = subprocess.run(
+        args=["blueutil", "--version"],
+        capture_output=True,
+        text=True,
+    )
+    return command.stdout.strip()
 
 
 def get_paired_devices():
@@ -25,6 +35,7 @@ def get_paired_devices():
         args=["blueutil", "--paired", "--format", "json"],
         capture_output=True,
         text=True,
+        timeout=TIMEOUT,
     )
 
     handle_returncodes(errorcode=command.returncode)
@@ -55,7 +66,7 @@ def remove_duplicate_entries(
     return updated_list
 
 
-def handle_returncodes(errorcode: int):
+def handle_returncodes(errorcode: int) -> int:
     match errorcode:
         case 0:
             return 0
@@ -84,13 +95,27 @@ def handle_returncodes(errorcode: int):
             return 1
 
 
+async def device_is_connected(device_address: str) -> bool:
+    try:
+        command = subprocess.run(
+            args=["blueutil", "--is-connected", device_address],
+            capture_output=True,
+            text=True,
+            timeout=TIMEOUT,
+        )
+    except subprocess.TimeoutExpired as e:
+        raise e
+
+    return bool(int(command.stdout))
+
+
 async def connect_device(device_address: str):
     try:
         command = subprocess.run(
             args=["blueutil", "--connect", device_address],
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=TIMEOUT,
         )
     except subprocess.TimeoutExpired:
         return 1
@@ -98,22 +123,6 @@ async def connect_device(device_address: str):
     returncode = handle_returncodes(errorcode=command.returncode)
 
     return returncode
-
-
-async def device_is_connected(device_address: str) -> bool:
-    try:
-        command = subprocess.run(
-            args=["blueutil", "--is-connected", device_address],
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-    except subprocess.TimeoutExpired as e:
-        raise e
-
-    # returncode = handle_returncodes(errorcode=command.returncode)
-
-    return bool(int(command.stdout))
 
 
 async def disconnect_device(device_address: str):
@@ -122,7 +131,7 @@ async def disconnect_device(device_address: str):
             args=["blueutil", "--disconnect", device_address],
             capture_output=True,
             text=True,
-            timeout=5,
+            timeout=TIMEOUT,
         )
     except subprocess.TimeoutExpired:
         return 1
@@ -130,3 +139,19 @@ async def disconnect_device(device_address: str):
     returncode = handle_returncodes(errorcode=command.returncode)
 
     return returncode
+
+
+async def search_new_devices():
+    command = subprocess.run(
+        args=["blueutil", "--inquiry", "7", "--format", "json"],
+        capture_output=True,
+        text=True,
+        timeout=TIMEOUT,
+    )
+
+    handle_returncodes(errorcode=command.returncode)
+
+    if command.stdout:
+        devices = command.stdout
+        formatted_devices = format_device_string(device_string=devices)
+        return formatted_devices
