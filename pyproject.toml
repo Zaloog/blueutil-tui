@@ -7,7 +7,7 @@ license = { text = "MIT" }
 authors = [
     { name = "Zaloog", email = "gramslars@gmail.com" }
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
     "textual>=1.0.0",
 ]
