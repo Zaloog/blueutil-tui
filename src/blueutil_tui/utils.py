@@ -85,26 +85,32 @@ def handle_returncodes(errorcode: int):
 
 
 async def connect_device(device_address: str):
-    command = subprocess.run(
-        args=["blueutil", "--connect", device_address],
-        capture_output=True,
-        text=True,
-        timeout=5,
-    )
+    try:
+        command = subprocess.run(
+            args=["blueutil", "--connect", device_address],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except subprocess.TimeoutExpired:
+        return 1
 
-    handle_returncodes(errorcode=command.returncode)
+    returncode = handle_returncodes(errorcode=command.returncode)
 
-    return command.returncode
+    return returncode
 
 
 async def disconnect_device(device_address: str):
-    command = subprocess.run(
-        args=["blueutil", "--disconnect", device_address],
-        capture_output=True,
-        text=True,
-        timeout=5,
-    )
+    try:
+        command = subprocess.run(
+            args=["blueutil", "--disconnect", device_address],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except subprocess.TimeoutExpired:
+        return 1
 
-    handle_returncodes(errorcode=command.returncode)
+    returncode = handle_returncodes(errorcode=command.returncode)
 
-    return command.returncode
+    return returncode

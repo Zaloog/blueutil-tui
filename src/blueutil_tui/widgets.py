@@ -56,6 +56,18 @@ class OverViewTable(DataTable):
                     value=":red_circle:",
                 )
                 self.notify("Disconnected", timeout=1)
+            else:
+                self.update_cell(
+                    row_key=selected_address,
+                    column_key="connection",
+                    value=":green_circle:",
+                )
+                self.notify(
+                    title="Error",
+                    message="Please check if the device is nearby",
+                    timeout=1,
+                    severity="error",
+                )
         else:
             self.update_cell(
                 row_key=selected_address, column_key="connection", value="updating..."
@@ -69,3 +81,15 @@ class OverViewTable(DataTable):
                     value=":green_circle:",
                 )
                 self.notify("Connected", timeout=1)
+            else:
+                self.update_cell(
+                    row_key=selected_address,
+                    column_key="connection",
+                    value=":red_circle:",
+                )
+                self.notify(
+                    title="Error",
+                    message="Please check if the device is nearby",
+                    timeout=1,
+                    severity="error",
+                )
