@@ -82,3 +82,29 @@ def handle_returncodes(errorcode: int):
         case _:
             console.print("No standart blueutil error")
             return 1
+
+
+async def connect_device(device_address: str):
+    command = subprocess.run(
+        args=["blueutil", "--connect", device_address],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+
+    handle_returncodes(errorcode=command.returncode)
+
+    return command.returncode
+
+
+async def disconnect_device(device_address: str):
+    command = subprocess.run(
+        args=["blueutil", "--disconnect", device_address],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+
+    handle_returncodes(errorcode=command.returncode)
+
+    return command.returncode

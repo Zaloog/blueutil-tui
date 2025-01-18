@@ -1,16 +1,16 @@
-from textual import on
+from textual import on, work
 from textual.widgets import DataTable
 from textual.binding import Binding
 
-from blueutil_tui.utils import get_paired_devices
+from blueutil_tui.utils import get_paired_devices, connect_device, disconnect_device
 from blueutil_tui.constants import GREEN_RED_DICT
 
 
 class OverViewTable(DataTable):
     BINDINGS = [
-        Binding("j", "cursor_down", "Down"),
-        Binding("k", "cursor_up", "Up"),
-        Binding("space", "select_cursor", "Toggle Connection"),
+        Binding("j, down", "cursor_down", "Down", key_display="j/↓"),
+        Binding("k, up", "cursor_up", "Up", key_display="k/↑"),
+        Binding("space", "select_cursor", "Connect/Disconnect"),
     ]
 
     def on_mount(self):
@@ -39,6 +39,33 @@ class OverViewTable(DataTable):
             )
 
     @on(DataTable.RowSelected)
-    def toggle_connection(self, event: DataTable.RowSelected):
+    @work(thread=True)
+    async def toggle_connection(self, event: DataTable.RowSelected):
         selected_address = event.row_key.value
-        self.notify(selected_address, timeout=1)
+
+        if self.get_row(row_key=selected_address)[0] == ":green_circle:":
+            self.update_cell(
+                row_key=selected_address, column_key="connection", value="updating..."
+            )
+
+            output = await disconnect_device(device_address=selected_address)
+            if output == 0:
+                self.update_cell(
+                    row_key=selected_address,
+                    column_key="connection",
+                    value=":red_circle:",
+                )
+                self.notify("Disconnected", timeout=1)
+        else:
+            self.update_cell(
+                row_key=selected_address, column_key="connection", value="updating..."
+            )
+            output = await connect_device(device_address=selected_address)
+
+            if output == 0:
+                self.update_cell(
+                    row_key=selected_address,
+                    column_key="connection",
+                    value=":green_circle:",
+                )
+                self.notify("Connected", timeout=1)
