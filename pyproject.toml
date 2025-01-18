@@ -1,8 +1,9 @@
 [project]
 name = "blueutil-tui"
 version = "0.1.0"
-description = "Add your description here"
+description = "minimal tui to interact with bluetooth devices via blueutil on Mac"
 readme = "README.md"
+license = { text = "MIT" }
 authors = [
     { name = "Zaloog", email = "gramslars@gmail.com" }
 ]
@@ -11,6 +12,24 @@ dependencies = [
     "textual>=1.0.0",
 ]
 
+keywords = ["python", "textual", "tui", "bluetooth", "mac", "blueutil"]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Environment :: MacOS X",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+]
+
+[project.urls]
+Repository = "https://github.com/Zaloog/blueutil-tui"
+Changelog = "https://github.com/Zaloog/blueutil-tui/blob/main/CHANGELOG.md"
 [project.scripts]
 btui = "blueutil_tui:main"
 

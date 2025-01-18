@@ -39,6 +39,21 @@ I recommend using [homebrew] for installation (Other ways can be found [here][bl
 ```bash
 brew install blueutil
 ```
+## Usage
+`blueutil-tui` can be started with:
+
+```bash
+btui
+```
+Only the paired devices are shown. To search for more devices press `s`.
+Refreshing the view with `r` removes the unpaired devices from the view again.
+
+To close `blueutil-tui` press `ctrl+q`.
+
+## Feedback and Issues
+Feel free to reach out and share your feedback, or open an [Issue],
+if something doesnt work as expected.
+Also check the [Changelog] for new updates.
 
 <!-- Repo Links -->
 [Changelog]: https://github.com/Zaloog/blueutil-tui/blob/main/CHANGELOG.md
