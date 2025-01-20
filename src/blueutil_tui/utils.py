@@ -4,18 +4,18 @@ import json
 
 from rich.console import Console
 
-console = Console()
+console = Console(stderr=True)
 TIMEOUT = 8
 
 
 def check_blueutil_installation():
     if shutil.which("blueutil") is None:
         console.print(
-            '[blue]"blueutil"[/] was not found, please install with e.g. [blue]"brew install blueutil"[/] '
+            '[blue]"blueutil"[/] was not found, please install with e.g. [blue]"brew install blueutil"[/]'
         )
         console.print("or use another installation method from:")
         console.print(
-            "[blue underline]https://github.com/toy/blueutil?tab=readme-ov-file#installupdateuninstall[/] "
+            "[blue underline]https://github.com/toy/blueutil?tab=readme-ov-file#installupdateuninstall[/]"
         )
         return False
     return True
@@ -146,7 +146,7 @@ async def search_new_devices():
         args=["blueutil", "--inquiry", "4", "--format", "json"],
         capture_output=True,
         text=True,
-        # timeout=TIMEOUT,
+        timeout=TIMEOUT,
     )
 
     handle_returncodes(errorcode=command.returncode)
