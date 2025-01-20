@@ -1,4 +1,5 @@
 from textual import on, work
+from textual.reactive import reactive
 from textual.widgets import DataTable, Label
 from textual.binding import Binding
 
@@ -23,10 +24,13 @@ class OverViewTable(DataTable):
         Binding("p", "toggle_pair_device", "un/pair"),
     ]
 
+    search_timer: reactive[int] = reactive(4, init=False)
+
     def on_mount(self):
         self.show_header = True
         self.cursor_type = "row"
         self.zebra_stripes = True
+        self.timer = self.set_interval(1, self.update_time, pause=True)
 
         self.add_column(":electric_plug: Connection", key="connection")
         self.add_column(":handshake: Paired", key="paired")
@@ -113,21 +117,40 @@ class OverViewTable(DataTable):
                     severity="error",
                 )
 
-    @work(thread=True, exclusive=False, name="look-for-devices")
+    @work(thread=True, exclusive=True, name="look-for-devices")
     async def action_display_new_devices(self):
         self.app.call_from_thread(callback=self.show_search_label)
+        self.app.call_from_thread(callback=self.start_timer)
         new_devices = await search_new_devices()
-        self.app.call_from_thread(callback=self.hide_search_label)
 
         self.app.call_from_thread(
             callback=lambda: self.update_rows(new_devices=new_devices)
         )
 
+    def start_timer(self):
+        self.search_timer = 4
+        self.timer.resume()
+
+    async def update_time(self):
+        if self.search_timer == 0:
+            self.timer.reset()
+            await self.hide_search_label()
+        else:
+            self.search_timer -= 1
+
+    def watch_search_timer(self):
+        self.app.query_exactly_one("#label-search", Label).update(
+            f"Searching... {self.search_timer}s"
+        )
+
     async def show_search_label(self):
-        await self.app.mount(Label("Searching...", id="label-search"))
+        if self.app.query(Label):
+            return
+        await self.app.mount(Label("Searching... 4s", id="label-search"))
 
     async def hide_search_label(self):
-        await self.app.query_exactly_one("#label-search", Label).remove()
+        if self.app.query(Label):
+            await self.app.query_exactly_one("#label-search", Label).remove()
 
     def update_rows(self, new_devices: list[dict]):
         for device in new_devices:
@@ -147,8 +170,6 @@ class OverViewTable(DataTable):
     async def action_toggle_pair_device(self):
         selected_address = self.get_row_at(self.cursor_row)[-1]
         paired = True if "green" in self.get_row_at(self.cursor_row)[1] else False
-        # self.notify(f'{selected_address}', timeout=1)
-        # return
 
         if paired:
             self.update_cell(
