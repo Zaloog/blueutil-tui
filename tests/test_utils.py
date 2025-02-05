@@ -1,7 +1,8 @@
 from blueutil_tui.utils import check_blueutil_installation
 
 
-def test_check_blueutil_installation(capsys):
+def test_check_blueutil_installation(capsys, mocker):
+    mocker.patch("shutil.which", return_value=None)
     check_blueutil_installation()
     captured = capsys.readouterr()
     err_str = (

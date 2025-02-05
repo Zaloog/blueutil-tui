@@ -43,14 +43,17 @@ dev = [
     "pre-commit>=4.0.1",
     "pre-commit-uv>=4.1.4",
     "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.3",
     "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
+    "pytest-subprocess>=1.5.3",
     "textual-dev>=1.7.0",
 ]
 
 [tool.pytest.ini_options]
 # async for app tests
-# asyncio_mode = "auto"
-# asyncio_default_fixture_loop_scope = "file"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "file"
 addopts = "--cov src/blueutil_tui --cov-report term-missing --verbose --color=yes"# -n 4 --dist=loadfile"
 testpaths = ["tests"]
 

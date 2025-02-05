@@ -23,7 +23,7 @@ def check_blueutil_installation():
 
 def get_blueutil_version():
     command = subprocess.run(
-        args=["blueutil", "--version"],
+        ["blueutil", "--version"],
         capture_output=True,
         text=True,
     )
@@ -32,7 +32,7 @@ def get_blueutil_version():
 
 def get_paired_devices():
     command = subprocess.run(
-        args=["blueutil", "--paired", "--format", "json"],
+        ["blueutil", "--paired", "--format", "json"],
         capture_output=True,
         text=True,
         timeout=TIMEOUT,
@@ -52,18 +52,18 @@ def format_device_string(device_string: str) -> list[dict[str, str | bool]]:
     return json_dict
 
 
-def remove_duplicate_entries(
-    json_list: list[dict[str, str | bool]],
-) -> list[dict[str, str | bool]]:
-    updated_list = []
-    addresses = []
-    for device in json_list:
-        if device["address"] not in addresses:
-            updated_list.append(device)
-            addresses.append(device["address"])
-        else:
-            ...
-    return updated_list
+# def remove_duplicate_entries(
+#     json_list: list[dict[str, str | bool]],
+# ) -> list[dict[str, str | bool]]:
+#     updated_list = []
+#     addresses = []
+#     for device in json_list:
+#         if device["address"] not in addresses:
+#             updated_list.append(device)
+#             addresses.append(device["address"])
+#         else:
+#             ...
+#     return updated_list
 
 
 def handle_returncodes(errorcode: int) -> int:
@@ -98,7 +98,7 @@ def handle_returncodes(errorcode: int) -> int:
 async def device_is_connected(device_address: str) -> bool:
     try:
         command = subprocess.run(
-            args=["blueutil", "--is-connected", device_address],
+            ["blueutil", "--is-connected", device_address],
             capture_output=True,
             text=True,
             timeout=TIMEOUT,
@@ -112,7 +112,7 @@ async def device_is_connected(device_address: str) -> bool:
 async def connect_device(device_address: str):
     try:
         command = subprocess.run(
-            args=["blueutil", "--connect", device_address],
+            ["blueutil", "--connect", device_address],
             capture_output=True,
             text=True,
             timeout=TIMEOUT,
@@ -128,7 +128,7 @@ async def connect_device(device_address: str):
 async def disconnect_device(device_address: str):
     try:
         command = subprocess.run(
-            args=["blueutil", "--disconnect", device_address],
+            ["blueutil", "--disconnect", device_address],
             capture_output=True,
             text=True,
             timeout=TIMEOUT,
@@ -143,7 +143,7 @@ async def disconnect_device(device_address: str):
 
 async def search_new_devices():
     command = subprocess.run(
-        args=["blueutil", "--inquiry", "4", "--format", "json"],
+        ["blueutil", "--inquiry", "4", "--format", "json"],
         capture_output=True,
         text=True,
         timeout=TIMEOUT,
@@ -160,7 +160,7 @@ async def search_new_devices():
 async def pair_device(device_address: str) -> int:
     try:
         command = subprocess.run(
-            args=["blueutil", "--pair", device_address],
+            ["blueutil", "--pair", device_address],
             capture_output=True,
             text=True,
             timeout=TIMEOUT,
@@ -176,7 +176,7 @@ async def pair_device(device_address: str) -> int:
 async def unpair_device(device_address: str) -> int:
     try:
         command = subprocess.run(
-            args=["blueutil", "--unpair", device_address],
+            ["blueutil", "--unpair", device_address],
             capture_output=True,
             text=True,
             timeout=TIMEOUT,
