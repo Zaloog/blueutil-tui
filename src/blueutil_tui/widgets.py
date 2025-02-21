@@ -59,16 +59,22 @@ class DeviceTable(DataTable):
         selected_address = event.row_key.value
 
         if await device_is_connected(device_address=selected_address):
-            self.update_cell(
-                row_key=selected_address, column_key="connection", value="updating..."
+            self.app.call_from_thread(
+                lambda: self.update_cell(
+                    row_key=selected_address,
+                    column_key="connection",
+                    value="updating...",
+                )
             )
 
             output = await disconnect_device(device_address=selected_address)
             if output == 0:
-                self.update_cell(
-                    row_key=selected_address,
-                    column_key="connection",
-                    value=":red_circle:",
+                self.app.call_from_thread(
+                    lambda: self.update_cell(
+                        row_key=selected_address,
+                        column_key="connection",
+                        value=":red_circle:",
+                    )
                 )
                 self.notify(
                     title="Success",
@@ -76,10 +82,12 @@ class DeviceTable(DataTable):
                     timeout=1.5,
                 )
             else:
-                self.update_cell(
-                    row_key=selected_address,
-                    column_key="connection",
-                    value=":green_circle:",
+                self.app.call_from_thread(
+                    lambda: self.update_cell(
+                        row_key=selected_address,
+                        column_key="connection",
+                        value=":green_circle:",
+                    )
                 )
                 self.notify(
                     title="Error",
@@ -94,10 +102,12 @@ class DeviceTable(DataTable):
             output = await connect_device(device_address=selected_address)
 
             if output == 0:
-                self.update_cell(
-                    row_key=selected_address,
-                    column_key="connection",
-                    value=":green_circle:",
+                self.app.call_from_thread(
+                    lambda: self.update_cell(
+                        row_key=selected_address,
+                        column_key="connection",
+                        value=":green_circle:",
+                    )
                 )
                 self.notify(
                     title="Success",
@@ -105,11 +115,14 @@ class DeviceTable(DataTable):
                     timeout=1.5,
                 )
             else:
-                self.update_cell(
-                    row_key=selected_address,
-                    column_key="connection",
-                    value=":red_circle:",
+                self.app.call_from_thread(
+                    lambda: self.update_cell(
+                        row_key=selected_address,
+                        column_key="connection",
+                        value=":red_circle:",
+                    )
                 )
+
                 self.notify(
                     title="Error",
                     message=f"Please check if [blue]{self.rows[selected_address].label}[/] is nearby",
@@ -172,16 +185,20 @@ class DeviceTable(DataTable):
         paired = True if "green" in self.get_row_at(self.cursor_row)[1] else False
 
         if paired:
-            self.update_cell(
-                row_key=selected_address, column_key="paired", value="updating..."
+            self.app.call_from_thread(
+                lambda: self.update_cell(
+                    row_key=selected_address, column_key="paired", value="updating..."
+                )
             )
 
             output = await unpair_device(device_address=selected_address)
             if output == 0:
-                self.update_cell(
-                    row_key=selected_address,
-                    column_key="paired",
-                    value=":red_circle:",
+                self.app.call_from_thread(
+                    lambda: self.update_cell(
+                        row_key=selected_address,
+                        column_key="paired",
+                        value=":red_circle:",
+                    )
                 )
                 self.notify(
                     title="Success",
@@ -189,10 +206,12 @@ class DeviceTable(DataTable):
                     timeout=1.5,
                 )
             else:
-                self.update_cell(
-                    row_key=selected_address,
-                    column_key="paired",
-                    value=":green_circle:",
+                self.app.call_from_thread(
+                    lambda: self.update_cell(
+                        row_key=selected_address,
+                        column_key="paired",
+                        value=":green_circle:",
+                    )
                 )
                 self.notify(
                     title="Error",
@@ -201,16 +220,20 @@ class DeviceTable(DataTable):
                     severity="error",
                 )
         else:
-            self.update_cell(
-                row_key=selected_address, column_key="paired", value="updating..."
+            self.app.call_from_thread(
+                lambda: self.update_cell(
+                    row_key=selected_address, column_key="paired", value="updating..."
+                )
             )
             output = await pair_device(device_address=selected_address)
 
             if output == 0:
-                self.update_cell(
-                    row_key=selected_address,
-                    column_key="paired",
-                    value=":green_circle:",
+                self.app.call_from_thread(
+                    lambda: self.update_cell(
+                        row_key=selected_address,
+                        column_key="paired",
+                        value=":green_circle:",
+                    )
                 )
                 self.notify(
                     title="Success",
@@ -218,10 +241,12 @@ class DeviceTable(DataTable):
                     timeout=1.5,
                 )
             else:
-                self.update_cell(
-                    row_key=selected_address,
-                    column_key="paired",
-                    value=":red_circle:",
+                self.app.call_from_thread(
+                    lambda: self.update_cell(
+                        row_key=selected_address,
+                        column_key="paired",
+                        value=":red_circle:",
+                    )
                 )
                 self.notify(
                     title="Error",

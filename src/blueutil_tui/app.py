@@ -21,4 +21,8 @@ class BlueUtilApp(App):
     @work(thread=True)
     def get_blueutil_version(self):
         version = get_blueutil_version()
+        self.call_from_thread(self.update_title, version)
+        # self.screen.title += f" using blueutil v{version}"
+
+    def update_title(self, version):
         self.screen.title += f" using blueutil v{version}"
