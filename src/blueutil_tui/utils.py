@@ -30,7 +30,7 @@ def get_blueutil_version():
     return command.stdout.strip()
 
 
-def get_paired_devices():
+def get_paired_devices() -> list[dict[str, str | bool]] | None:
     command = subprocess.run(
         ["blueutil", "--paired", "--format", "json"],
         capture_output=True,
@@ -44,6 +44,7 @@ def get_paired_devices():
         devices = command.stdout
         formatted_devices = format_device_string(device_string=devices)
         return formatted_devices
+    return []
 
 
 def format_device_string(device_string: str) -> list[dict[str, str | bool]]:

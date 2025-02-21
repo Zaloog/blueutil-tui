@@ -14,7 +14,7 @@ from blueutil_tui.utils import (
 )
 
 
-class OverViewTable(DataTable):
+class DeviceTable(DataTable):
     BINDINGS = [
         Binding("j, down", "cursor_down", "down", key_display="j/↓"),
         Binding("k, up", "cursor_up", "up", key_display="k/↑"),

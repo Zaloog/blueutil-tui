@@ -4,7 +4,7 @@ from textual.app import App, ComposeResult
 from textual.widgets import Footer, Header
 
 from blueutil_tui.utils import get_blueutil_version
-from blueutil_tui.widgets import OverViewTable
+from blueutil_tui.widgets import DeviceTable
 
 
 class BlueUtilApp(App):
@@ -14,7 +14,7 @@ class BlueUtilApp(App):
     def compose(self) -> ComposeResult:
         self.screen.title = "blueutil-tui"
         yield Header(icon="")
-        yield OverViewTable()
+        yield DeviceTable()
         yield Footer()
         return super().compose()
 
