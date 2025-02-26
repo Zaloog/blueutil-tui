@@ -67,72 +67,33 @@ class DeviceTable(DataTable):
         )
         # disconnecting
         if await device_is_connected(device_address=selected_address):
-            output = await disconnect_device(device_address=selected_address)
-            # success = await disconnect_device(device_address=selected_address)
-            # new_status = ':red_circle:' if success == 0 else ':green_circle:'
-            # message = f"[blue]{self.rows[selected_address].label}[/] disconnected" if success == 0 else f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby"
-            # disconnecting successfull
-            if output == 0:
-                self.app.call_from_thread(
-                    lambda: self.update_cell(
-                        row_key=selected_address,
-                        column_key="connection",
-                        value=":red_circle:",
-                    )
-                )
-                self.notify(
-                    title="Success",
-                    message=f"[blue]{self.rows[selected_address].label}[/] disconnected",
-                    timeout=1.5,
-                )
-            # error while disconnecting
+            success = await disconnect_device(device_address=selected_address)
+            new_status = ":red_circle:" if success == 0 else ":green_circle:"
+            if success == 0:
+                message = f"[blue]{self.rows[selected_address].label}[/] disconnected"
             else:
-                self.app.call_from_thread(
-                    lambda: self.update_cell(
-                        row_key=selected_address,
-                        column_key="connection",
-                        value=":green_circle:",
-                    )
-                )
-                self.notify(
-                    title="Error",
-                    message=f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby",
-                    timeout=1.5,
-                    severity="error",
-                )
+                message = f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby"
         # connecting
         else:
-            output = await connect_device(device_address=selected_address)
-            # connecting successfull
-            if output == 0:
-                self.app.call_from_thread(
-                    lambda: self.update_cell(
-                        row_key=selected_address,
-                        column_key="connection",
-                        value=":green_circle:",
-                    )
-                )
-                self.notify(
-                    title="Success",
-                    message=f"[blue]{self.rows[selected_address].label}[/] connected",
-                    timeout=1.5,
-                )
-            # error while connecting
+            success = await connect_device(device_address=selected_address)
+            new_status = ":green_circle:" if success == 0 else ":red_circle:"
+            if success == 0:
+                message = f"[blue]{self.rows[selected_address].label}[/] connected"
             else:
-                self.app.call_from_thread(
-                    lambda: self.update_cell(
-                        row_key=selected_address,
-                        column_key="connection",
-                        value=":red_circle:",
-                    )
-                )
+                message = f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby"
 
-                self.notify(
-                    title="Error",
-                    message=f"Please check if [blue]{self.rows[selected_address].label}[/] is nearby",
-                    timeout=1.5,
-                    severity="error",
-                )
+        self.app.call_from_thread(
+            lambda: self.update_cell(
+                row_key=selected_address,
+                column_key="connection",
+                value=new_status,
+            )
+        )
+        self.notify(
+            title="Success",
+            message=message,
+            timeout=1.5,
+        )
 
     @work(thread=True, exclusive=True, name="look-for-devices")
     async def action_display_new_devices(self):
