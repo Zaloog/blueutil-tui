@@ -58,16 +58,20 @@ class DeviceTable(DataTable):
     async def toggle_connection(self, event: DataTable.RowSelected):
         selected_address = event.row_key.value
 
-        if await device_is_connected(device_address=selected_address):
-            self.app.call_from_thread(
-                lambda: self.update_cell(
-                    row_key=selected_address,
-                    column_key="connection",
-                    value="updating...",
-                )
+        self.app.call_from_thread(
+            lambda: self.update_cell(
+                row_key=selected_address,
+                column_key="connection",
+                value="updating...",
             )
-
+        )
+        # disconnecting
+        if await device_is_connected(device_address=selected_address):
             output = await disconnect_device(device_address=selected_address)
+            # success = await disconnect_device(device_address=selected_address)
+            # new_status = ':red_circle:' if success == 0 else ':green_circle:'
+            # message = f"[blue]{self.rows[selected_address].label}[/] disconnected" if success == 0 else f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby"
+            # disconnecting successfull
             if output == 0:
                 self.app.call_from_thread(
                     lambda: self.update_cell(
@@ -81,6 +85,7 @@ class DeviceTable(DataTable):
                     message=f"[blue]{self.rows[selected_address].label}[/] disconnected",
                     timeout=1.5,
                 )
+            # error while disconnecting
             else:
                 self.app.call_from_thread(
                     lambda: self.update_cell(
@@ -95,12 +100,10 @@ class DeviceTable(DataTable):
                     timeout=1.5,
                     severity="error",
                 )
+        # connecting
         else:
-            self.update_cell(
-                row_key=selected_address, column_key="connection", value="updating..."
-            )
             output = await connect_device(device_address=selected_address)
-
+            # connecting successfull
             if output == 0:
                 self.app.call_from_thread(
                     lambda: self.update_cell(
@@ -114,6 +117,7 @@ class DeviceTable(DataTable):
                     message=f"[blue]{self.rows[selected_address].label}[/] connected",
                     timeout=1.5,
                 )
+            # error while connecting
             else:
                 self.app.call_from_thread(
                     lambda: self.update_cell(
