@@ -90,7 +90,7 @@ class DeviceTable(DataTable):
             )
         )
         self.notify(
-            title="Success",
+            title="Error" if "nearby" in message else "Success",
             message=message,
             timeout=1.5,
         )
@@ -149,73 +149,32 @@ class DeviceTable(DataTable):
         selected_address = self.get_row_at(self.cursor_row)[-1]
         paired = True if "green" in self.get_row_at(self.cursor_row)[1] else False
 
+        # pairing
         if paired:
-            self.app.call_from_thread(
-                lambda: self.update_cell(
-                    row_key=selected_address, column_key="paired", value="updating..."
-                )
-            )
-
-            output = await unpair_device(device_address=selected_address)
-            if output == 0:
-                self.app.call_from_thread(
-                    lambda: self.update_cell(
-                        row_key=selected_address,
-                        column_key="paired",
-                        value=":red_circle:",
-                    )
-                )
-                self.notify(
-                    title="Success",
-                    message=f"[blue]{self.rows[selected_address].label}[/] unpaired",
-                    timeout=1.5,
-                )
+            success = await unpair_device(device_address=selected_address)
+            new_status = ":red_circle:" if success == 0 else ":green_circle:"
+            if success == 0:
+                message = f"[blue]{self.rows[selected_address].label}[/] unpaired"
             else:
-                self.app.call_from_thread(
-                    lambda: self.update_cell(
-                        row_key=selected_address,
-                        column_key="paired",
-                        value=":green_circle:",
-                    )
-                )
-                self.notify(
-                    title="Error",
-                    message=f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby",
-                    timeout=1.5,
-                    severity="error",
-                )
+                message = f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby"
+        # unpairing
         else:
-            self.app.call_from_thread(
-                lambda: self.update_cell(
-                    row_key=selected_address, column_key="paired", value="updating..."
-                )
-            )
-            output = await pair_device(device_address=selected_address)
-
-            if output == 0:
-                self.app.call_from_thread(
-                    lambda: self.update_cell(
-                        row_key=selected_address,
-                        column_key="paired",
-                        value=":green_circle:",
-                    )
-                )
-                self.notify(
-                    title="Success",
-                    message=f"[blue]{self.rows[selected_address].label}[/] pairing",
-                    timeout=1.5,
-                )
+            success = await pair_device(device_address=selected_address)
+            new_status = ":green_circle:" if success == 0 else ":red_circle:"
+            if success == 0:
+                message = f"[blue]{self.rows[selected_address].label}[/] paired"
             else:
-                self.app.call_from_thread(
-                    lambda: self.update_cell(
-                        row_key=selected_address,
-                        column_key="paired",
-                        value=":red_circle:",
-                    )
-                )
-                self.notify(
-                    title="Error",
-                    message=f"Please check if [blue]{self.rows[selected_address].label}[/] is nearby",
-                    timeout=1.5,
-                    severity="error",
-                )
+                message = f"Please check [blue]{self.rows[selected_address].label}[/] if the device is nearby"
+
+        self.app.call_from_thread(
+            lambda: self.update_cell(
+                row_key=selected_address,
+                column_key="paired",
+                value=new_status,
+            )
+        )
+        self.notify(
+            title="Error" if "nearby" in message else "Success",
+            message=message,
+            timeout=1.5,
+        )
