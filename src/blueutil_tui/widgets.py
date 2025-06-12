@@ -44,6 +44,10 @@ class DeviceTable(DataTable):
         self.clear()
         devices = get_paired_devices()
         for device in devices:
+            # skip already present devices
+            if device in self.rows.values():
+                continue
+
             self.add_row(
                 ":green_circle:" if device["connected"] else ":red_circle:",
                 ":green_circle:" if device["paired"] else ":red_circle:",

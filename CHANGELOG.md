@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.2.2
+- Fix Bug with duplicate table entries
+
 ## v0.2.1
 - Change worker methods to use `call_from_thread`
 
