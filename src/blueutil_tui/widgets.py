@@ -45,7 +45,7 @@ class DeviceTable(DataTable):
         devices = get_paired_devices()
         for device in devices:
             # skip already present devices
-            if device in self.rows.values():
+            if device["address"] in self.rows.values():
                 continue
 
             self.add_row(
