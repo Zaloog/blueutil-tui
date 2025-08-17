@@ -1,6 +1,6 @@
 [project]
 name = "blueutil-tui"
-version = "0.2.3"
+version = "0.2.4"
 description = "minimal tui to interact with bluetooth devices via blueutil on Mac"
 readme = "README.md"
 license = { text = "MIT" }

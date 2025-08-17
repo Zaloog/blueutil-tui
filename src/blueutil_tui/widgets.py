@@ -42,10 +42,12 @@ class DeviceTable(DataTable):
 
     def action_update_devices(self):
         self.clear()
+
         devices = get_paired_devices()
+
         for device in devices:
             # skip already present devices
-            if device["address"] in self.rows.values():
+            if device["address"] in self.rows.keys():
                 continue
 
             self.add_row(

@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.2.4
+- Fix Bug with duplicate table entries
+
 ## v0.2.3
 - Fix device attribute
 
